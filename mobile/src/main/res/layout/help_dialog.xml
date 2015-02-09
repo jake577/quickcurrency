@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:id="@+id/ScrollView01"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:scrollbarAlwaysDrawVerticalTrack="true"
+        android:id="@+id/instructions_view" >
+
+        <TextView   android:id="@+id/helpText1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/help_list"
+            android:paddingBottom="10dp"/>
+        <TextView   android:id="@+id/helpText2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/help_order"
+            android:paddingBottom="10dp"/>
+        <TextView   android:id="@+id/helpText3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/help_add"
+            android:paddingBottom="10dp"/>
+        <TextView   android:id="@+id/helpText4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/help_remove"
+            android:paddingBottom="10dp"/>
+        <TextView   android:id="@+id/helpText5"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/help_exchanges"
+            android:paddingBottom="10dp"/>
+
+    </LinearLayout>
+</ScrollView>
