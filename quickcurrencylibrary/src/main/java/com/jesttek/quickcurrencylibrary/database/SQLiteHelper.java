@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 
+import com.jesttek.quickcurrencylibrary.ExchangeConstants;
+
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     public static final int CURRENT_VERSION = 1;
@@ -30,7 +32,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS " + Exchange.TABLE_NAME + "(" +
                 BaseColumns._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 Exchange.KEY_NAME + " TEXT not null, " +
-                Exchange.KEY_URL + " TEXT not null, " +
+                Exchange.KEY_URL_ID + " TEXT not null, " +
                 Exchange.KEY_ACTIVE + " INTEGER default 1, " +
                 Exchange.FOREIGN_KEY_CURRENCYPAIR + " INTEGER not null, " +
                 "FOREIGN KEY(" + Exchange.FOREIGN_KEY_CURRENCYPAIR + ") REFERENCES " + CurrencyPair.TABLE_NAME + "(" + BaseColumns._ID + ")" +
@@ -42,14 +44,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                         CurrencyPair.KEY_GRIDROW + "," +
                         CurrencyPair.KEY_DISPLAYED + "," +
                         Exchange.KEY_NAME + "," +
-                        Exchange.KEY_URL + "," +
+                        Exchange.KEY_URL_ID + "," +
                         Exchange.KEY_ACTIVE + "," +
                         Exchange.FOREIGN_KEY_CURRENCYPAIR +
                         " FROM " + CurrencyPair.TABLE_NAME + " INNER JOIN " + Exchange.TABLE_NAME + " ON ("+CurrencyPair.TABLE_NAME +"."+BaseColumns._ID + " = " + Exchange.FOREIGN_KEY_CURRENCYPAIR + ")");
 
         String sql = "INSERT OR REPLACE INTO " + CurrencyPair.TABLE_NAME + " ( " + BaseColumns._ID + "," + CurrencyPair.KEY_CURRENCY1 + "," + CurrencyPair.KEY_CURRENCY2 + "," + CurrencyPair.KEY_DISPLAYED + "," + CurrencyPair.KEY_GRIDROW + " ) VALUES ( ?, ?, ?, ?, ? )";
         mPreparedInsertCurrencyPair = sqLiteDatabase.compileStatement(sql);
-        sql = "INSERT OR REPLACE INTO " + Exchange.TABLE_NAME + " ( " + Exchange.KEY_NAME + "," + Exchange.KEY_URL + "," + Exchange.KEY_ACTIVE + "," + Exchange.FOREIGN_KEY_CURRENCYPAIR + " ) VALUES ( ?, ?, ?, ? )";
+        sql = "INSERT OR REPLACE INTO " + Exchange.TABLE_NAME + " ( " + Exchange.KEY_NAME + "," + Exchange.KEY_URL_ID + "," + Exchange.KEY_ACTIVE + "," + Exchange.FOREIGN_KEY_CURRENCYPAIR + " ) VALUES ( ?, ?, ?, ? )";
         mPreparedInsertExchange = sqLiteDatabase.compileStatement(sql);
 
         //populate tables
@@ -60,28 +62,46 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         insertCurrencyPair(3, "LITECOIN", "BITCOIN", true, 2);
         insertCurrencyPair(4, "DOGECOIN", "USD", true, 3);
         insertCurrencyPair(5, "DOGECOIN", "BITCOIN", true, 4);
+        insertCurrencyPair(6, "DARKCOIN", "USD", true, 5);
+        insertCurrencyPair(7, "DARKCOIN", "BITCOIN", true, 6);
 
         //bitcoin usd
-        insertExchange("bitfinex", "https://api.bitfinex.com/v1/pubticker/BTCUSD", true, 1);
-        insertExchange("btce", "https://btc-e.com/api/2/btc_usd/ticker", true, 1);
-        insertExchange("bter", "http://data.bter.com/api/1/ticker/btc_usd", true, 1);
-        insertExchange("bitstamp", "https://www.bitstamp.net/api/ticker/", true, 1);
+        insertExchange(ExchangeConstants.Coinbase.name(), "BTC-USD", true, 1);
+        insertExchange(ExchangeConstants.Bitfinex.name(), "btcusd", true, 1);
+        insertExchange(ExchangeConstants.Btce.name(), "btc_usd", true, 1);
+        insertExchange(ExchangeConstants.Bter.name(), "btc_usd", true, 1);
+        insertExchange(ExchangeConstants.Bitstamp.name(), "", true, 1);
+        insertExchange(ExchangeConstants.Cryptsy.name(), "2", true, 1);
 
         //litecoin usd
-        insertExchange("bitfinex", "https://api.bitfinex.com/v1/pubticker/LTCUSD", true, 2);
-        insertExchange("btce", "https://btc-e.com/api/2/ltc_usd/ticker", true, 2);
-        insertExchange("bter", "http://data.bter.com/api/1/ticker/ltc_usd", true, 2);
+        insertExchange(ExchangeConstants.Bitfinex.name(), "ltcusd", true, 2);
+        insertExchange(ExchangeConstants.Btce.name(), "ltc_usd", true, 2);
+        insertExchange(ExchangeConstants.Bter.name(), "ltc_usd", true, 2);
+        insertExchange(ExchangeConstants.Cryptsy.name(), "1", true, 2);
 
         //litecoin bitcoin
-        insertExchange("bitfinex", "https://api.bitfinex.com/v1/pubticker/LTCBTC", true, 3);
-        insertExchange("btce", "https://btc-e.com/api/2/ltc_btc/ticker", true, 3);
-        insertExchange("bter", "http://data.bter.com/api/1/ticker/ltc_btc", true, 3);
+        insertExchange(ExchangeConstants.Bitfinex.name(), "ltcbtc", true, 3);
+        insertExchange(ExchangeConstants.Btce.name(), "ltc_btc", true, 3);
+        insertExchange(ExchangeConstants.Bter.name(), "ltc_btc", true, 3);
+        insertExchange(ExchangeConstants.Cryptsy.name(), "3", true, 3);
 
         //dogecoin usd
-        insertExchange("bter", "http://data.bter.com/api/1/ticker/doge_usd", true, 4);
+        insertExchange(ExchangeConstants.Bter.name(), "doge_usd", true, 4);
+        insertExchange(ExchangeConstants.Cryptsy.name(), "182", true, 4);
 
         //dogecoin bitcoin
-        insertExchange("bter", "http://data.bter.com/api/1/ticker/doge_btc", true, 5);
+        insertExchange(ExchangeConstants.Bter.name(), "doge_btc", true, 5);
+        insertExchange(ExchangeConstants.Cryptsy.name(), "132", true, 5);
+
+        //darkcoin usd
+        insertExchange(ExchangeConstants.Bitfinex.name(), "drkusd", true, 6);
+        insertExchange(ExchangeConstants.Bter.name(), "drk_usd", true, 6);
+        insertExchange(ExchangeConstants.Cryptsy.name(), "213", true, 6);
+
+        //darkcoin bitcoin
+        insertExchange(ExchangeConstants.Bitfinex.name(), "drkbtc", true, 7);
+        insertExchange(ExchangeConstants.Bter.name(), "drk_btc", true, 7);
+        insertExchange(ExchangeConstants.Cryptsy.name(), "155", true, 7);
 
         sqLiteDatabase.setTransactionSuccessful();
         sqLiteDatabase.endTransaction();
@@ -122,14 +142,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     /**
      * Convenience method for inserting Exchange using a prepared statement
      * @param name
-     * @param URL
+     * @param URLid
      * @param active
      * @param currencyPairId
      */
-    private void insertExchange(String name, String URL, boolean active, int currencyPairId) {
+    private void insertExchange(String name, String URLid, boolean active, int currencyPairId) {
 
         mPreparedInsertExchange.bindString(1, name);
-        mPreparedInsertExchange.bindString(2, URL);
+        mPreparedInsertExchange.bindString(2, URLid);
         mPreparedInsertExchange.bindLong(3, active ? 1 : 0);
         mPreparedInsertExchange.bindLong(4, currencyPairId);
         mPreparedInsertExchange.execute();

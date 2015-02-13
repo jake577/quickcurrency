@@ -5,11 +5,7 @@ import android.os.Bundle;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -18,6 +14,15 @@ import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
+import com.jesttek.quickcurrencylibrary.ExchangeConstants;
+import com.jesttek.quickcurrencylibrary.ExchangeControllers.AbstractExchange;
+import com.jesttek.quickcurrencylibrary.ExchangeControllers.Bitfinex;
+import com.jesttek.quickcurrencylibrary.ExchangeControllers.Bitstamp;
+import com.jesttek.quickcurrencylibrary.ExchangeControllers.Btce;
+import com.jesttek.quickcurrencylibrary.ExchangeControllers.Bter;
+import com.jesttek.quickcurrencylibrary.ExchangeControllers.Coinbase;
+import com.jesttek.quickcurrencylibrary.ExchangeControllers.Cryptsy;
+import com.jesttek.quickcurrencylibrary.ExchangeControllers.DataLoadedListener;
 import com.jesttek.quickcurrencylibrary.MessageConstants;
 import com.jesttek.quickcurrencylibrary.database.CoinExchangeProvider;
 import com.jesttek.quickcurrencylibrary.database.CurrencyPair;
@@ -29,7 +34,7 @@ import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
-public class WearableDataLoaderService extends WearableListenerService {
+public class WearableDataLoaderService extends WearableListenerService implements DataLoadedListener {
 
     private static final String TAG = "QuickCurrencyPoller";
     private GoogleApiClient mGoogleApiClient;
@@ -37,7 +42,6 @@ public class WearableDataLoaderService extends WearableListenerService {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate()");
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
                     @Override
@@ -63,7 +67,6 @@ public class WearableDataLoaderService extends WearableListenerService {
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
 
-        Log.d(TAG,"Message received: " + messageEvent.getPath());
         if(messageEvent.getPath().equals(MessageConstants.MESSAGE_POLL_PATH)) {
             int exchangeId = -1;
             try {
@@ -138,49 +141,37 @@ public class WearableDataLoaderService extends WearableListenerService {
             mQueue = Volley.newRequestQueue(getApplicationContext());
         }
 
-        String[] columns = new String[] {Exchange.KEY_NAME, Exchange.KEY_URL};
+        String[] columns = new String[] {Exchange.KEY_NAME, Exchange.KEY_URL_ID};
         String[] args = {Integer.toString(exchangeId)};
         Cursor c = getContentResolver().query(CoinExchangeProvider.EXCHANGE_CONTENT_URI, columns, BaseColumns._ID + " = ?", args, null);
         if(c.moveToFirst()) {
-            String url = c.getString(1);
-            final String exchangeName = c.getString(0);
+            String urlId = c.getString(1);
+            final ExchangeConstants exchangeName = ExchangeConstants.valueOf(c.getString(0));
 
-            if (url != null) {
-                JsonObjectRequest jsonRequest = new JsonObjectRequest(Request.Method.GET, url, null,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                byte[] replyData = null;
-                                if (exchangeName.equals("bitstamp") || exchangeName.equals("bter")) {
-                                    replyData = parseResponse(response);
-                                } else if (exchangeName.equals("btce")) {
-                                    replyData = parseBtceResponse(response);
-                                } else if (exchangeName.equals("bitfinex")) {
-                                    replyData = parseBitfinexResponse(response);
-                                }
+            if (urlId != null) {
 
-                                Log.d(TAG, "Sending reply to pageId " + exchangeId + " for exchange " + exchangeName);
-                                PendingResult<MessageApi.SendMessageResult> result = Wearable.MessageApi.sendMessage(
-                                        mGoogleApiClient,
-                                        nodeId,
-                                        replyData == null ? com.jesttek.quickcurrencylibrary.MessageConstants.MESSAGE_REPLY_ERROR_PATH + "/" + exchangeId : com.jesttek.quickcurrencylibrary.MessageConstants.MESSAGE_POLL_REPLY_PATH + "/" + exchangeId,
-                                        replyData
-                                );
-                            }
-                        },
-                        new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.w(TAG, "Failed connecting to bitstamp server: " + error.getMessage());
-                                PendingResult<MessageApi.SendMessageResult> result = Wearable.MessageApi.sendMessage(
-                                        mGoogleApiClient,
-                                        nodeId,
-                                        com.jesttek.quickcurrencylibrary.MessageConstants.MESSAGE_REPLY_ERROR_PATH,
-                                        null
-                                );
-                            }
-                        });
-                mQueue.add(jsonRequest);
+                AbstractExchange exchange = null;
+                switch (exchangeName) {
+                    case Bitfinex:
+                        exchange = new Bitfinex(this, nodeId, exchangeId);
+                        break;
+                    case Bitstamp:
+                        exchange = new Bitstamp(this, nodeId, exchangeId);
+                        break;
+                    case Btce:
+                        exchange = new Btce(this, nodeId, exchangeId);
+                        break;
+                    case Bter:
+                        exchange = new Bter(this, nodeId, exchangeId);
+                        break;
+                    case Coinbase:
+                        exchange = new Coinbase(this, nodeId, exchangeId);
+                        break;
+                    case Cryptsy:
+                        exchange = new Cryptsy(this, nodeId, exchangeId);
+                        break;
+                }
+                exchange.getData(mQueue, urlId);
             } else {
                 //message was received for a website app doesn't support. Should never occur
                 Log.w(TAG, "invalid exchange request: " + exchangeName);
@@ -205,22 +196,21 @@ public class WearableDataLoaderService extends WearableListenerService {
         c.close();
     }
 
-    /**
-     * Gets relevant data from json object and packs it into a new message to be sent to wearable
-     * @param response the data from the web server to be parsed
-     * @return the message to be sent back to the wearable. Null if there was an error parsing data
-     */
-    public byte[] parseBitfinexResponse(JSONObject response) {
+    @Override
+    public void onDataLoaded(String nodeId, int exchangeId, String last, String high, String low) {
         try {
-            //get just the data we want and put it in a new JSONObject
             JSONObject message = new JSONObject();
-            String low = response.getString("low");
-            String high = response.getString("high");
-            String last = response.getString("last_price");
             message.put("last", last);
             message.put("high", high);
             message.put("low", low);
-            return message.toString().getBytes("utf-8");
+            byte[] replyData = message.toString().getBytes("utf-8");
+            Log.d(TAG, "Sending reply to pageId " + exchangeId);
+            PendingResult<MessageApi.SendMessageResult> result = Wearable.MessageApi.sendMessage(
+                    mGoogleApiClient,
+                    nodeId,
+                    replyData == null ? com.jesttek.quickcurrencylibrary.MessageConstants.MESSAGE_REPLY_ERROR_PATH + "/" + exchangeId : com.jesttek.quickcurrencylibrary.MessageConstants.MESSAGE_POLL_REPLY_PATH + "/" + exchangeId,
+                    replyData
+            );
         }
         catch(JSONException ex) {
             //Couldn't put the strings in new jsonObject.
@@ -231,67 +221,16 @@ public class WearableDataLoaderService extends WearableListenerService {
             //UTF-8 isn't supported. This should never happen
             Log.w(TAG, ex);
         }
-        return null;
     }
 
-    /**
-     * Gets relevant data from json object and packs it into a new message to be sent to wearable
-     * @param response the data from the web server to be parsed
-     * @return the message to be sent back to the wearable. Null if there was an error parsing data
-     */
-    public byte[] parseBtceResponse(JSONObject response) {
-        try {
-            //get just the data we want and put it in a new JSONObject
-            JSONObject message = new JSONObject();
-            JSONObject ticker = response.getJSONObject("ticker");
-            String low = ticker.getString("low");
-            String high = ticker.getString("high");
-            String last = ticker.getString("last");
-            message.put("last", last);
-            message.put("high", high);
-            message.put("low", low);
-            return message.toString().getBytes("utf-8");
-        }
-        catch(JSONException ex) {
-            //Couldn't put the strings in new jsonObject.
-            //This should never happen.
-            Log.w(TAG, ex);
-        }
-        catch(UnsupportedEncodingException ex) {
-            //UTF-8 isn't supported. This should never happen
-            Log.w(TAG, ex);
-        }
-        return null;
-    }
-
-    /**
-     * Gets relevant data from json object and packs it into a new message to be sent to wearable.
-     * Most exchanges return similar jsonObject that contains with "low", "high" and "last" fields
-     * that can be parsed by this function.
-     * @param response the data from the web server to be parsed
-     * @return the message to be sent back to the wearable. Null if there was an error parsing data
-     */
-    public byte[] parseResponse(JSONObject response) {
-        try {
-            //get just the data we want and put it in a new JSONObject
-            JSONObject message = new JSONObject();
-            String low = response.getString("low");
-            String high = response.getString("high");
-            String last = response.getString("last");
-            message.put("last", last);
-            message.put("high", high);
-            message.put("low", low);
-            return message.toString().getBytes("utf-8");
-        }
-        catch(JSONException ex) {
-            //Couldn't put the strings in new jsonObject.
-            //This should never happen.
-            Log.w(TAG, ex);
-        }
-        catch(UnsupportedEncodingException ex) {
-            //UTF-8 isn't supported. This should never happen
-            Log.w(TAG, ex);
-        }
-        return null;
+    @Override
+    public void onLoadFailed(String nodeId, int exchangeId, String message) {
+        Log.w(TAG, message);
+        PendingResult<MessageApi.SendMessageResult> result = Wearable.MessageApi.sendMessage(
+                mGoogleApiClient,
+                nodeId,
+                com.jesttek.quickcurrencylibrary.MessageConstants.MESSAGE_REPLY_ERROR_PATH + "/" + exchangeId,
+                null
+        );
     }
 }

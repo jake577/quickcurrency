@@ -28,7 +28,6 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     wearApp project(':wear')
 
-
     compile project(':quickcurrencylibrary')
     compile 'com.google.android.gms:play-services-wearable:6.1.71'
     compile 'com.android.support:support-v4:21.0.2'
