@@ -8,4 +8,8 @@
         android:icon="@drawable/ic_action_help"
         android:title="@string/action_help"
         android:showAsAction="always" />
+    <item android:id="@+id/action_rate"
+        android:icon="@drawable/ic_action_rate"
+        android:title="@string/action_help"
+        android:showAsAction="always" />
 </menu>

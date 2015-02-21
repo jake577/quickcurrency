@@ -3,7 +3,6 @@ package com.jesttek.quickcurrency;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 
 
 /**
@@ -25,7 +24,6 @@ import android.util.Log;
 public class CoinListActivity extends FragmentActivity implements CoinListFragment.ListCallbacks, CoinDetailFragment.DetailCallbacks {
 
     private static final int DETAIL_RESULT = 0;
-    private static String TEST_TAG = "test";
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -97,7 +95,6 @@ public class CoinListActivity extends FragmentActivity implements CoinListFragme
             getSupportFragmentManager().beginTransaction().hide(detailFrag).commit();
         } else {
             // In single-pane mode this activity shouldn't be open and this method won't be called. Just don't do anything.
-            Log.e(TEST_TAG, "This shouldn't happen in single pane mode");
         }
     }
 }

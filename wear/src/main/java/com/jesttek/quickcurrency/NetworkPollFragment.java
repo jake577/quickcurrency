@@ -19,6 +19,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.jesttek.quickcurrencylibrary.CoinConstants;
+import com.jesttek.quickcurrencylibrary.MessageConstants;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,9 +29,6 @@ import java.util.List;
 
 public class NetworkPollFragment extends android.app.Fragment implements MessageApi.MessageListener {
 
-    private static final String MESSAGE_REPLY_ERROR_PATH = "/polling_service/refresh_error";
-    private static final String MESSAGE_REPLY_PATH = "/polling_service/fresh_data";
-    private static final String MESSAGE_POLL_PATH = "/poll_coin";
     private static final String TAG = "QuickCurrencyDataViewer";
 
     private static final int REFRESH_TIME = 30000;
@@ -164,19 +162,12 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
         }
     };
 
-    /**
-     * This method will generate all the nodes that are attached to a Google Api Client.
-     * Theoretically, only one should be: the phone. I'm assuming that the first node is
-     * the host phone, and saving that node so the node list doesn't need to be checked again.
-     */
     private void sendMessage(){
         if(mPollingActive) {
             mHandler.postDelayed(mRequest, REFRESH_TIME);
         }
 
         if(mPollingActive) {
-            Log.d(TAG, "node " + mId + " sending request for " + mExchange + " : " + mCurrencyFrom.getShortName() + "-" + mCurrencyTo.getShortName());
-
             //TODO: redo this if we haven't received a reply from the host in a while
             if(mPeerNode == null) {
                 NodeApi.GetConnectedNodesResult rawNodes = Wearable.NodeApi.getConnectedNodes(mGoogleApiClient).await();
@@ -193,7 +184,7 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
                     PendingResult<MessageApi.SendMessageResult> result = Wearable.MessageApi.sendMessage(
                             mGoogleApiClient,
                             mPeerNode.getId(),
-                            MESSAGE_POLL_PATH,
+                            MessageConstants.MESSAGE_POLL_PATH,
                             message.toString().getBytes("utf-8")
                     );
 
@@ -228,7 +219,7 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
                     final double high = jsonObj.getDouble("high");
                     final double low = jsonObj.getDouble("low");
                     Log.d(TAG, "node " + mId + " receiving results for " + mExchange);
-                    if(messageEvent.getPath().startsWith(MESSAGE_REPLY_PATH)) {
+                    if(messageEvent.getPath().startsWith(MessageConstants.MESSAGE_POLL_REPLY_PATH)) {
                         this.getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

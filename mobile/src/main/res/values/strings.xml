@@ -3,6 +3,9 @@
 
     <string name="app_name">QuickCurrency</string>
     <string name="title_coin_detail">Coin Detail</string>
+    <string name="title_widget_config">QuickCurrency Widget</string>
+
+
     <string name="action_help">Help</string>
     <string name="action_add">Add</string>
     <string name="action_remove">Remove</string>
@@ -12,5 +15,7 @@
     <string name="help_remove">Remove an item from the list by clicking on it then clicking the delete button</string>
     <string name="help_exchanges">Select the exchanges you want shown by clicking on an item then using the checkboxes to select exchanges</string>
     <string name="help_order">Items will appear in the same row on the watch as they do in this list. You can change the order by clicking and dragging them in this list</string>
+
+    <string name="widget_refresh_description">Note that this refresh rate applies to all widgets. Recommended to not use a value below 30 minutes as this may cause high battery drain. You can also refresh a widget by tapping it</string>
 
 </resources>
