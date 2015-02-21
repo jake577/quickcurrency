@@ -36,7 +36,7 @@ import java.io.UnsupportedEncodingException;
 
 public class WearableDataLoaderService extends WearableListenerService implements DataLoadedListener {
 
-    private static final String TAG = "QuickCurrencyPoller";
+    private static final String TAG = WearableDataLoaderService.class.getName();
     private GoogleApiClient mGoogleApiClient;
     private RequestQueue mQueue;
     @Override
@@ -50,13 +50,13 @@ public class WearableDataLoaderService extends WearableListenerService implement
                     }
                     @Override
                     public void onConnectionSuspended(int cause) {
-                        Log.d(TAG, "onConnectionSuspended: " + cause);
+                        Log.w(TAG, "onConnectionSuspended: " + cause);
                     }
                 })
                 .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(ConnectionResult result) {
-                        Log.d(TAG, "onConnectionFailed: " + result);
+                        Log.w(TAG, "onConnectionFailed: " + result);
                     }
                 })
                 .addApi(Wearable.API)
@@ -72,10 +72,9 @@ public class WearableDataLoaderService extends WearableListenerService implement
             try {
                 JSONObject jsonObj = new JSONObject(new String(messageEvent.getData(), "UTF-8"));
                 exchangeId = jsonObj.getInt("exchangeId");
-                Log.d(TAG, "received request from " + exchangeId);
             }
             catch (Exception ex) {
-                Log.w(TAG, "message received in invalid format");
+                Log.w(this.getClass().getName(), "message received in invalid format");
                 Log.w(TAG, ex);
                 super.onMessageReceived(messageEvent);
                 return;
@@ -123,7 +122,6 @@ public class WearableDataLoaderService extends WearableListenerService implement
             catch (Exception ex) {
                 Log.e(TAG, "Exception", ex);
             }
-            Log.d(TAG,"Sending reply. Using path " + com.jesttek.quickcurrencylibrary.MessageConstants.MESSAGE_PAGES_REPLY_PATH);
             Wearable.MessageApi.sendMessage(
                     mGoogleApiClient,
                     messageEvent.getSourceNodeId(),
@@ -204,7 +202,7 @@ public class WearableDataLoaderService extends WearableListenerService implement
             message.put("high", high);
             message.put("low", low);
             byte[] replyData = message.toString().getBytes("utf-8");
-            Log.d(TAG, "Sending reply to pageId " + exchangeId);
+
             PendingResult<MessageApi.SendMessageResult> result = Wearable.MessageApi.sendMessage(
                     mGoogleApiClient,
                     nodeId,

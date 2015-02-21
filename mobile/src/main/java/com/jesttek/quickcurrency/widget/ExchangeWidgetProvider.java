@@ -8,7 +8,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import java.io.File;
 
@@ -46,7 +45,6 @@ public class ExchangeWidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        Log.d("test", "ExchangeWidgetProvider.onReceive()");
     }
 
     public static void updateConfig(Context context, AppWidgetManager appWidgetManager, int appWidgetId) {

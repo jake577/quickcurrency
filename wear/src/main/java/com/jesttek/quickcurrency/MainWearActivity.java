@@ -36,7 +36,7 @@ import java.util.List;
 
 public class MainWearActivity extends Activity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks{
 
-    private static final String TAG = "QuickCurrencyMain";
+    private static final String TAG = MainWearActivity.class.getName();
     private Point mLastPage = new Point(0,0);
     private MyGridViewPagerAdapter mAdapter;
     private GoogleApiClient mGoogleApiClient;
@@ -179,7 +179,6 @@ public class MainWearActivity extends Activity implements MessageApi.MessageList
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
-        Log.d("test","onMessageReceived " + messageEvent.getData());
         if(messageEvent.getPath().equals(MessageConstants.MESSAGE_PAGES_REPLY_PATH))
         {
             try {
@@ -229,7 +228,7 @@ public class MainWearActivity extends Activity implements MessageApi.MessageList
                 .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(ConnectionResult result) {
-                        Log.d(TAG, "onConnectionFailed: " + result);
+                        Log.w(TAG, "onConnectionFailed: " + result);
                     }
                 })
                 .addApi(Wearable.API)

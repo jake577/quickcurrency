@@ -33,6 +33,7 @@ import java.math.MathContext;
 import java.text.DecimalFormat;
 
 public class WidgetService extends Service implements DataLoadedListener {
+    private static final String TAG = WidgetService.class.getName();
     private RequestQueue mQueue;
     private int mWaitingOn = 0;
     private boolean mComplete = false;
@@ -101,12 +102,12 @@ public class WidgetService extends Service implements DataLoadedListener {
 
             } else {
                 //message was received for a website app doesn't support. Should never occur
-                Log.w(WidgetService.class.getName(), "invalid exchange request: " + exchangeName);
+                Log.w(TAG, "invalid exchange request: " + exchangeName);
             }
         }
         else {
             //Requested exchange id didn't exist
-            Log.w(WidgetService.class.getName(), "invalid exchange id request: " + exchangeId);
+            Log.w(TAG, "invalid exchange id request: " + exchangeId);
         }
         c.close();
     }

@@ -29,8 +29,7 @@ import java.util.List;
 
 public class NetworkPollFragment extends android.app.Fragment implements MessageApi.MessageListener {
 
-    private static final String TAG = "QuickCurrencyDataViewer";
-
+    private static final String TAG = NetworkPollFragment.class.getName();
     private static final int REFRESH_TIME = 30000;
 
     //A short delay is used from when fragment is displayed and when first data request is made.
@@ -144,7 +143,6 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
 
     @Override
     public void onDetach() {
-        Log.d(TAG, "node " + mId + ": onDetach()");
         setActive(false);
         super.onDetach();
     }
@@ -156,7 +154,6 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
         @Override
         public void onResult(Status status) {
             if(mPollingActive) {
-                Log.d(TAG, "node " + mId + " :Listener connected: posting sendMessage");
                 mHandler.post(mRequest);
             }
         }
@@ -191,11 +188,11 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
                 } catch (JSONException ex) {
                     //Couldn't put the strings in new jsonObject.
                     //This should never happen.
-                    Log.w(TAG, ex);
+                    Log.e(TAG,  "failed encoding json", ex);
                 } catch (UnsupportedEncodingException ex) {
                     //UTF-8 isn't supported.
                     //This should never happen
-                    Log.w(TAG, ex);
+                    Log.e(TAG, "failed encoding json", ex);
                 }
             }
             else {
@@ -210,7 +207,6 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
         This method runs in a background thread.
         */
         if(mPollingActive) {
-            Log.v(TAG, "Node "+mId+": Message received on wear: " + messageEvent.getPath());
             if(messageEvent.getPath().endsWith(Integer.toString(mId)))
             {
                 try {
@@ -218,7 +214,7 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
                     final double last = jsonObj.getDouble("last");
                     final double high = jsonObj.getDouble("high");
                     final double low = jsonObj.getDouble("low");
-                    Log.d(TAG, "node " + mId + " receiving results for " + mExchange);
+
                     if(messageEvent.getPath().startsWith(MessageConstants.MESSAGE_POLL_REPLY_PATH)) {
                         this.getActivity().runOnUiThread(new Runnable() {
                             @Override
@@ -237,10 +233,10 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
                     }
                 }
                 catch(UnsupportedEncodingException ex) {
-                    Log.d(TAG, "invalid json in message received");
+                    Log.e(TAG, "invalid json in message received", ex);
                 }
                 catch(JSONException ex) {
-                    Log.d(TAG, "invalid json in message received");
+                    Log.e(TAG, "invalid json in message received", ex);
                 }
             }
         }
@@ -263,7 +259,6 @@ public class NetworkPollFragment extends android.app.Fragment implements Message
             mHandler.postDelayed(new ActivateFragTask(this), LOAD_DELAY);
         }
         else {
-            Log.d(TAG, "node " + mId + ": stopping polling");
             mPollingActive = false;
             mHandler.removeCallbacksAndMessages(null);
             Wearable.MessageApi.removeListener(mGoogleApiClient, this);
