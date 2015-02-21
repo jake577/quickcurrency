@@ -16,6 +16,6 @@
     <string name="help_exchanges">Select the exchanges you want shown by clicking on an item then using the checkboxes to select exchanges</string>
     <string name="help_order">Items will appear in the same row on the watch as they do in this list. You can change the order by clicking and dragging them in this list</string>
 
-    <string name="widget_refresh_description">Note that this refresh rate applies to all widgets. Recommended to not use a value below 30 minutes as this may cause high battery drain. You can also refresh a widget by tapping it</string>
+    <string name="widget_refresh_description">Note that this refresh rate applies to all widgets. Minimum is 5 minutes but it\'s recommended to not use a value below 30 minutes as this may cause high battery drain. You can also refresh a widget by tapping it</string>
 
 </resources>

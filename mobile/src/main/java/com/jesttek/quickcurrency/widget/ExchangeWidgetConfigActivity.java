@@ -46,6 +46,7 @@ public class ExchangeWidgetConfigActivity extends Activity implements LoaderMana
     private SharedPreferences mWidgetPreferences;
     private Spinner mCurrencyList;
     private Spinner mExchangeList;
+    private EditText mEditText;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,6 +71,16 @@ public class ExchangeWidgetConfigActivity extends Activity implements LoaderMana
         widgetPrefEditor.putBoolean(SETUP_PREFERENCE, false);
         widgetPrefEditor.commit();
 
+        mEditText = (EditText) findViewById(R.id.refresh_rate_edittext);
+        mEditText.setOnFocusChangeListener( new View.OnFocusChangeListener() {
+           @Override
+           public void onFocusChange(View v, boolean hasFocus) {
+               if(Integer.parseInt(mEditText.getText().toString()) < 5) {
+                   mEditText.setText("5");
+               }
+           }
+       });
+
         Button button = (Button) findViewById(R.id.done_button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,8 +90,13 @@ public class ExchangeWidgetConfigActivity extends Activity implements LoaderMana
                 SharedPreferences sharedPreferences = getSharedPreferences(PREFERENCE_FILE, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
 
-                EditText editText = (EditText) findViewById(R.id.refresh_rate_edittext);
-                editor.putInt(REFRESH_RATE_PREFERENCE, Integer.parseInt(editText.getText().toString())*1000*60);
+                int rate = Integer.parseInt(mEditText.getText().toString());
+                if(rate < 5) {
+                    mEditText.setText("5");
+                    rate = 5;
+                }
+
+                editor.putInt(REFRESH_RATE_PREFERENCE, rate*1000*60);
                 editor.commit();
                 SharedPreferences.Editor widgetPrefEditor = mWidgetPreferences.edit();
                 widgetPrefEditor.putBoolean(SETUP_PREFERENCE, true);
