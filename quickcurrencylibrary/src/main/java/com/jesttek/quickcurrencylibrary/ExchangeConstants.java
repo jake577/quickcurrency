@@ -6,5 +6,6 @@ public enum ExchangeConstants {
     Btce,
     Bter,
     Coinbase,
-    Cryptsy;
+    Cryptsy,
+    Kraken;
 }

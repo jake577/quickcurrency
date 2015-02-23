@@ -11,7 +11,7 @@ import com.jesttek.quickcurrencylibrary.ExchangeConstants;
 
 public class SQLiteHelper extends SQLiteOpenHelper {
 
-    public static final int CURRENT_VERSION = 1;
+    public static final int CURRENT_VERSION = 2;
     public static final String DATABASE_NAME = "Exchange";
     public static final String CURRENCY_EXCHANGE_VIEW = "CurrencyExchange";
     private SQLiteStatement mPreparedInsertCurrencyPair;
@@ -72,18 +72,21 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         insertExchange(ExchangeConstants.Bter.name(), "btc_usd", true, 1);
         insertExchange(ExchangeConstants.Bitstamp.name(), "", true, 1);
         insertExchange(ExchangeConstants.Cryptsy.name(), "2", true, 1);
+        insertExchange(ExchangeConstants.Kraken.name(), "XBTUSD", true, 1);
 
         //litecoin usd
         insertExchange(ExchangeConstants.Bitfinex.name(), "ltcusd", true, 2);
         insertExchange(ExchangeConstants.Btce.name(), "ltc_usd", true, 2);
         insertExchange(ExchangeConstants.Bter.name(), "ltc_usd", true, 2);
         insertExchange(ExchangeConstants.Cryptsy.name(), "1", true, 2);
+        insertExchange(ExchangeConstants.Kraken.name(), "LTCUSD", true, 2);
 
         //litecoin bitcoin
         insertExchange(ExchangeConstants.Bitfinex.name(), "ltcbtc", true, 3);
         insertExchange(ExchangeConstants.Btce.name(), "ltc_btc", true, 3);
         insertExchange(ExchangeConstants.Bter.name(), "ltc_btc", true, 3);
         insertExchange(ExchangeConstants.Cryptsy.name(), "3", true, 3);
+        insertExchange(ExchangeConstants.Kraken.name(), "XBTLTC", true, 3);
 
         //dogecoin usd
         insertExchange(ExchangeConstants.Bter.name(), "doge_usd", true, 4);
@@ -92,6 +95,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         //dogecoin bitcoin
         insertExchange(ExchangeConstants.Bter.name(), "doge_btc", true, 5);
         insertExchange(ExchangeConstants.Cryptsy.name(), "132", true, 5);
+        insertExchange(ExchangeConstants.Kraken.name(), "XBTXDG", true, 5);
 
         //darkcoin usd
         insertExchange(ExchangeConstants.Bitfinex.name(), "drkusd", true, 6);
@@ -109,11 +113,17 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-        //currently only one version exists. onUpgrade shouldn't happen, if it does drop and
-        //recreate database;
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + CurrencyPair.TABLE_NAME);
-        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + Exchange.TABLE_NAME);
-        onCreate(sqLiteDatabase);
+        sqLiteDatabase.beginTransactionNonExclusive();
+        switch(oldVersion) {
+            case 1:
+                //add data for kraken exchange
+                insertExchange(ExchangeConstants.Kraken.name(), "XBTUSD", true, 1);
+                insertExchange(ExchangeConstants.Kraken.name(), "LTCUSD", true, 2);
+                insertExchange(ExchangeConstants.Kraken.name(), "XBTLTC", true, 3);
+                insertExchange(ExchangeConstants.Kraken.name(), "XBTXDG", true, 5);
+        }
+        sqLiteDatabase.setTransactionSuccessful();
+        sqLiteDatabase.endTransaction();
     }
 
     /**
