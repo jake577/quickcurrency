@@ -5,7 +5,8 @@ public enum CoinConstants {
     DOGECOIN ("Dogecoin", "DOGE", R.drawable.dogecoin),
     LITECOIN ("Litecoin", "LTC", R.drawable.litecoin),
     DARKCOIN ("Darkcoin", "DRK", R.drawable.darkcoin),
-    USD ("USD", "USD", R.drawable.usd);
+    USD ("USD", "USD", R.drawable.usd),
+    MONERO ("Monero", "XMR", R.drawable.monero);
 
     private final String mName;
     private final String mShortName;

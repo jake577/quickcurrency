@@ -26,6 +26,7 @@ import com.jesttek.quickcurrencylibrary.ExchangeControllers.Coinbase;
 import com.jesttek.quickcurrencylibrary.ExchangeControllers.Cryptsy;
 import com.jesttek.quickcurrencylibrary.ExchangeControllers.DataLoadedListener;
 import com.jesttek.quickcurrencylibrary.ExchangeControllers.Kraken;
+import com.jesttek.quickcurrencylibrary.ExchangeControllers.Poloniex;
 import com.jesttek.quickcurrencylibrary.database.CoinExchangeProvider;
 import com.jesttek.quickcurrencylibrary.database.Exchange;
 
@@ -100,6 +101,9 @@ public class WidgetService extends Service implements DataLoadedListener {
                         break;
                     case Kraken:
                         exchange = new Kraken(this, String.valueOf(widgetId), exchangeId);
+                        break;
+                    case Poloniex:
+                        exchange = new Poloniex(this, String.valueOf(widgetId), exchangeId);
                         break;
                 }
                 exchange.getData(mQueue, urlId);

@@ -64,6 +64,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         insertCurrencyPair(5, "DOGECOIN", "BITCOIN", true, 4);
         insertCurrencyPair(6, "DARKCOIN", "USD", true, 5);
         insertCurrencyPair(7, "DARKCOIN", "BITCOIN", true, 6);
+        insertCurrencyPair(8, "MONERO", "BITCOIN", true, 7);
 
         //bitcoin usd
         insertExchange(ExchangeConstants.Coinbase.name(), "BTC-USD", true, 1);
@@ -87,6 +88,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         insertExchange(ExchangeConstants.Bter.name(), "ltc_btc", true, 3);
         insertExchange(ExchangeConstants.Cryptsy.name(), "3", true, 3);
         insertExchange(ExchangeConstants.Kraken.name(), "XBTLTC", true, 3);
+        insertExchange(ExchangeConstants.Poloniex.name(), "BTC_LTC", true, 3);
 
         //dogecoin usd
         insertExchange(ExchangeConstants.Bter.name(), "doge_usd", true, 4);
@@ -96,6 +98,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         insertExchange(ExchangeConstants.Bter.name(), "doge_btc", true, 5);
         insertExchange(ExchangeConstants.Cryptsy.name(), "132", true, 5);
         insertExchange(ExchangeConstants.Kraken.name(), "XBTXDG", true, 5);
+        insertExchange(ExchangeConstants.Poloniex.name(), "BTC_DOGE", true, 5);
 
         //darkcoin usd
         insertExchange(ExchangeConstants.Bitfinex.name(), "drkusd", true, 6);
@@ -106,6 +109,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         insertExchange(ExchangeConstants.Bitfinex.name(), "drkbtc", true, 7);
         insertExchange(ExchangeConstants.Bter.name(), "drk_btc", true, 7);
         insertExchange(ExchangeConstants.Cryptsy.name(), "155", true, 7);
+        insertExchange(ExchangeConstants.Poloniex.name(), "BTC_DRK", true, 7);
+
+        //monero bitcoin
+        insertExchange(ExchangeConstants.Poloniex.name(), "BTC_XMR", true, 8);
 
         sqLiteDatabase.setTransactionSuccessful();
         sqLiteDatabase.endTransaction();
@@ -116,11 +123,20 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         sqLiteDatabase.beginTransactionNonExclusive();
         switch(oldVersion) {
             case 1:
+                //add new currency pairs
+                insertCurrencyPair(8, "MONERO", "BITCOIN", true, 7);
+
                 //add data for kraken exchange
                 insertExchange(ExchangeConstants.Kraken.name(), "XBTUSD", true, 1);
                 insertExchange(ExchangeConstants.Kraken.name(), "LTCUSD", true, 2);
                 insertExchange(ExchangeConstants.Kraken.name(), "XBTLTC", true, 3);
                 insertExchange(ExchangeConstants.Kraken.name(), "XBTXDG", true, 5);
+
+                //add data for poloniex exchange
+                insertExchange(ExchangeConstants.Poloniex.name(), "BTC_LTC", true, 3);
+                insertExchange(ExchangeConstants.Poloniex.name(), "BTC_DOGE", true, 5);
+                insertExchange(ExchangeConstants.Poloniex.name(), "BTC_DRK", true, 7);
+                insertExchange(ExchangeConstants.Poloniex.name(), "BTC_XMR", true, 8);
         }
         sqLiteDatabase.setTransactionSuccessful();
         sqLiteDatabase.endTransaction();
